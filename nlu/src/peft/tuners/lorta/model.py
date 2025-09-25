@@ -47,6 +47,7 @@ from .awq import dispatch_awq
 from .config import LorTaConfig
 from .gptq import dispatch_gptq
 from .layer import Linear as LorTaLinear
+from .preconditioner import LoRTAPreconditioner
 from .layer import LorTaLayer, dispatch_default
 from .tp_layer import dispatch_megatron
 
@@ -132,6 +133,39 @@ class LorTaModel(BaseTuner):
 
     def __init__(self, model, config, adapter_name) -> None:
         super().__init__(model, config, adapter_name)
+
+        # Add preconditioner if enabled in config
+        self.preconditioner = None
+        if hasattr(config, 'use_preconditioning') and config.use_preconditioning:
+            self.preconditioner = LoRTAPreconditioner(
+                damping=getattr(config, 'precond_damping', 1e-4),
+                update_frequency=getattr(config, 'precond_update_freq', 1),
+                use_float16=getattr(config, 'precond_float16', False),
+                diagnostic=getattr(config, 'precond_diagnostic', False)
+            )
+
+
+    def apply_preconditioning(self):
+        """Apply preconditioning to LoRTA parameter gradients"""
+        if self.preconditioner is not None:
+            self.preconditioner.apply_preconditioning(
+                self.model.lora_A,
+                self.model.lora_B,
+                self.model.lora_C_h,
+                self.model.lora_C_l,
+                self.model.lora_C_m
+            )
+
+    def apply_preconditioning(self):
+        """Apply preconditioning to LoRTA parameter gradients"""
+        if self.preconditioner is not None:
+            self.preconditioner.apply_preconditioning(
+                self.model.lora_A,
+                self.model.lora_B,
+                self.model.lora_C_h,
+                self.model.lora_C_l,
+                self.model.lora_C_m
+            )
 
     def _map_layer_to_adapter(self, layer_idx: int, target_matrix: str) -> str:
         return ".".join([self.target_names_prefix, f"{layer_idx}", self.qkvo_mapping[target_matrix]])

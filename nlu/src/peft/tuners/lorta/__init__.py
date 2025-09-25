@@ -18,9 +18,10 @@ from .config import LoftQConfig, LorTaConfig
 from .gptq import QuantLinear
 from .layer import Conv2d, Embedding, Linear, LorTaLayer
 from .model import LorTaModel
+from .preconditioner import LoRTAPreconditioner, integrate_lorta_preconditioner
 
 
-__all__ = ["LorTaConfig", "LoftQConfig", "Conv2d", "Embedding", "LorTaLayer", "Linear", "LorTaModel", "QuantLinear"]
+__all__ = ["LorTaConfig", "LoftQConfig", "Conv2d", "Embedding", "LorTaLayer", "Linear", "LorTaModel", "QuantLinear", "LoRTAPreconditioner", "integrate_lorta_preconditioner"]
 
 
 def __getattr__(name):

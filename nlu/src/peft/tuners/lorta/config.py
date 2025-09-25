@@ -270,6 +270,27 @@ class LorTaConfig(PeftConfig):
         },
     )
 
+    use_preconditioning: bool = field(
+        default=False,
+        metadata={"help": "Enable LoRTA preconditioning based on Hessian approximation"}
+    )
+    precond_damping: float = field(
+        default=1e-4,
+        metadata={"help": "Damping parameter for preconditioner matrix inversion"}
+    )
+    precond_update_freq: int = field(
+        default=1,
+        metadata={"help": "Apply preconditioning every N optimisation steps"}
+    )
+    precond_float16: bool = field(
+        default=False,
+        metadata={"help": "Use float16 precision for preconditioner computation"}
+    )
+    precond_diagnostic: bool = field(
+        default=False,
+        metadata={"help": "Print preconditioner diagnostic information"}
+    )
+
     @property
     def is_prompt_learning(self) -> bool:
         r"""
